@@ -1,0 +1,7 @@
+<svg id="dashboard" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <path id="Path_2" data-name="Path 2" d="M8,8H28V34H8Z" transform="translate(-8 -8)" fill="#000000"/>
+  <path id="Path_3" data-name="Path 3" d="M8,32H28V44H8Z" transform="translate(-8 4)" fill="#000000"/>
+  <path id="Path_4" data-name="Path 4" d="M28,24H48V50H28Z" transform="translate(0 -2)" fill="#000000"/>
+  <path id="Path_5" data-name="Path 5" d="M28,8H48V20H28Z" transform="translate(0 -8)" fill="#000000"/>
+  <path id="Path_6" data-name="Path 6" d="M0,0H48V48H0Z" fill="rgba(0,0,0,0)"/>
+</svg>
