@@ -1,10 +1,11 @@
+
 // Public Components
 export { Home } from "./Public/Home";
 export { Login } from "./Public/Login";
 
-// Dashboard Components
+// Private Components
+export { Dashboard } from "./Private/Dashboard";
 export { Registration } from "./Dashboard/Registration";
-
 // Auth Components
 export { UseUserAuth, UserAuthContextProvider } from "../Context/UserAuth";
 
