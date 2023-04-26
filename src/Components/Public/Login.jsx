@@ -1,8 +1,10 @@
+import { ArrowLeftCircleIcon } from "@heroicons/react/24/outline"
 import React, { useState } from 'react';
 import { UseUserAuth } from '@/Components';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
+
 
 export const Login = () => {
 
@@ -74,7 +76,7 @@ export const Login = () => {
                             :
                             <div className="lg:w-3/4 w-full trshow">
                                 <button onClick={() => setForgetPassword(true)} type="button" className="flex items-center gap-2 text-base text-primary-0 py-2">
-                                    {/* <FontAwesomeIcon icon={faCircleLeft} /> */}
+                                    <ArrowLeftCircleIcon className="w-5 h-5"/>
                                     <p className="">Back to Login</p>
                                 </button>
                                 <h1 className="font-PoppinsSemiBold text-4xl text-zinc-800 pb-2 lg:text-left text-center">
