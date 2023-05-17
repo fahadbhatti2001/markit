@@ -4,8 +4,11 @@ export { Home } from "./Public/Home";
 export { Login } from "./Public/Login";
 
 // Private Components
-export { Dashboard } from "./Private/Dashboard";
-export { Registration } from "./Dashboard/Registration";
+export { Dashboard } from "./Dashboard/Dashboard";
+
+// General Components
+export { Modal } from "./General/Modal";
+
 // Auth Components
 export { UseUserAuth, UserAuthContextProvider } from "../Context/UserAuth";
 

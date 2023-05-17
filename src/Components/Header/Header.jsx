@@ -9,7 +9,7 @@ export const Header = (props) => {
     let {user} = UseUserAuth()
 
     return (
-        <div className={"flex justify-between items-center h-[10vh] w-full px-20 bg-primary-3 " + position}>
+        <div className={"flex justify-between items-center h-[10vh] w-full md:px-20 px-4 bg-primary-3 " + position}>
             <h1 className="font-PoppinsItalic text-2xl">markit</h1>
             
             {

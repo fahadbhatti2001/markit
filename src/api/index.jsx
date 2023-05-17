@@ -1,0 +1,1 @@
+export { sendImages, deleteImages } from "./post";

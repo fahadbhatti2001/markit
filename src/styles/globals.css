@@ -4,6 +4,7 @@
 
 body{
     background-color: #7d91f440;
+    @apply text-zinc-800;
 }
 
 @font-face {
