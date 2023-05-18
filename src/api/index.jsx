@@ -1,1 +1,1 @@
-export { sendImages, deleteImages } from "./post";
+export { sendImages, deleteImages, recognizeImage } from "./post";

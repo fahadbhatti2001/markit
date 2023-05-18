@@ -1,5 +1,4 @@
-export const sendImages = (dataSet) => {
-    const data = { images: dataSet };
+export const sendImages = (data) => {
     fetch('http://127.0.0.1:5000/process-images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -28,6 +27,24 @@ export const deleteImages = (id) => {
             // Handle response data from server here
             // console.log(data);
             alert(data.status)
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+}
+
+export const recognizeImage = (image) => {
+    const data = { image: image };
+    fetch('http://127.0.0.1:5000/recognize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            // Handle response data from server here
+            // console.log(data);
+            console.log(data.image)
         })
         .catch((error) => {
             console.error('Error:', error);
