@@ -1,4 +1,3 @@
-
 // Public Components
 export { Home } from "./Public/Home";
 export { Login } from "./Public/Login";
@@ -8,6 +7,7 @@ export { Dashboard } from "./Dashboard/Dashboard";
 
 // General Components
 export { Modal } from "./General/Modal";
+export { Spinner } from "./General/Spinner";
 
 // Auth Components
 export { UseUserAuth, UserAuthContextProvider } from "../Context/UserAuth";
