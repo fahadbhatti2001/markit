@@ -31,7 +31,7 @@
 
 export const recognizeImage = (image) => {
     const data = { image: image };
-    fetch('http://192.168.10.2:5000/recognize', {
+    fetch('http://192.168.1.2:5000/recognize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -40,7 +40,7 @@ export const recognizeImage = (image) => {
         .then((data) => {
             // Handle response data from server here
             // console.log(data);
-            console.log(data.image)
+            console.log(data.id)
         })
         .catch((error) => {
             console.error('Error:', error);

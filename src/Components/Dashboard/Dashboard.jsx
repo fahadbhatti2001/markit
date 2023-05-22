@@ -1,11 +1,10 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { Modal, Spinner } from '@/Components';
 import Webcam from 'react-webcam';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, serverTimestamp, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/FirebaseConfig';
-import { recognizeImage, sendImages } from '@/api';
 
 export const Dashboard = () => {
 
@@ -13,8 +12,15 @@ export const Dashboard = () => {
     let [showPopup, setShowPopup] = useState(false)
     let [spin, setSpin] = useState(false)
     const [dataSet, setDataSet] = useState([]);
+    let [data, setData] = useState()
+    const usersRef = collection(db, "User")
 
-    let uniqueId = Math.floor(Math.random() * (100000000000 - 999999999999 + 1)) + 999999999999;
+    const getData = async () => {
+        const userData = await getDocs(usersRef)
+        setData(userData.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+    };
+
+    let uniqueId = Math.floor(Math.random() * (999999999999 - 100000000000 + 1)) + 100000000000;
 
     const webRef = useRef(null);
 
@@ -53,6 +59,10 @@ export const Dashboard = () => {
         setShowPopup(false)
     };
 
+    useEffect(() => {
+        getData()
+    }, [])
+
     const {
         register,
         handleSubmit,
@@ -63,18 +73,21 @@ export const Dashboard = () => {
         setSpin(true)
         try {
             data.userid = uniqueId
-            // const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password)
-            // const user = userCredential.user
-            // data.timestamp = serverTimestamp()
-            // await setDoc(doc(db, 'Maids', user.uid), data)
+            const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password)
+            const user = userCredential.user
+            data.timestamp = serverTimestamp()
+            data.image = ""
+            await setDoc(doc(db, 'User', user.uid), data)
             data.images = dataSet
-            const response = await fetch('http://192.168.10.2:5000/process-images', {
+            const response = await fetch('http://192.168.1.2:5000/process-images', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
             const responseData = await response.json();
             setSpin(false)
+            getData()
+            setIsEdit(true)
         } catch (error) {
             console.error('Error:', error);
         }
@@ -96,7 +109,6 @@ export const Dashboard = () => {
                     </button>
                 </div>
             </Modal>
-            {/* <button onClick={() => recognize()} type='button' className="text-4xl text-black pt-[10vh]">s</button> */}
             <div className="h-screen md:px-20 px-4 pt-[10vh]">
                 <div className="py-4">
                     <h1 className="font-PoppinsRegular text-base">
@@ -136,7 +148,7 @@ export const Dashboard = () => {
                     isEdit ?
                         <div className="w-full bg-white rounded-md shadow">
                             <div className="p-4 border-b border-zinc-200 flex justify-between items-center">
-                                <h1 className="font-PoppinsRegular text-base">
+                                <h1 className="font-PoppinsSemiBold text-base">
                                     Registed Members
                                 </h1>
                                 <button onClick={() => setIsEdit(false)} className="font-PoppinsRegular text-base bg-primary-2 text-white py-1 px-4 rounded" type="button">
@@ -144,7 +156,32 @@ export const Dashboard = () => {
                                 </button>
                             </div>
                             <div className="h-60 overflow-auto w-full cst-scrollbar">
-                                <div className="grid grid-cols-12 place-items-center gap-2 p-4"></div>
+                                <div className="flex gap-2 py-3 px-4 border-b">
+                                    <h1 className="font-PoppinsSemiBold w-full">
+                                        Full Name
+                                    </h1>
+                                    <h1 className="font-PoppinsSemiBold w-full">
+                                        User ID
+                                    </h1>
+                                    <h1 className="font-PoppinsSemiBold w-full">
+                                        Email
+                                    </h1>
+                                </div>
+                                {
+                                    data == undefined ? null : data.map((e, i) => (
+                                        <div key={i} className="flex gap-2 py-3 px-4 border-b">
+                                            <h1 className="font-PoppinsRegular w-full">
+                                                {e.firstname} {e.lastname}
+                                            </h1>
+                                            <h1 className="font-PoppinsRegular w-full">
+                                                {e.userid}
+                                            </h1>
+                                            <h1 className="font-PoppinsRegular w-full">
+                                                {e.email}
+                                            </h1>
+                                        </div>
+                                    ))
+                                }
                             </div>
                         </div>
                         :
@@ -158,11 +195,11 @@ export const Dashboard = () => {
                                 </button>
                             </div>
                             <form className="h-60 overflow-auto w-full cst-scrollbar flex flex-col justify-between p-4">
-                                <div className="flex gap-4">
-                                    <input {...register("fname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="First Name" type="text" />
-                                    <input {...register("lname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Last Name" type="text" />
+                                <div className="flex md:flex-nowrap flex-wrap gap-4">
+                                    <input {...register("firstname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="First Name" type="text" />
+                                    <input {...register("lastname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Last Name" type="text" />
                                 </div>
-                                <div className="flex gap-4">
+                                <div className="flex md:flex-nowrap flex-wrap gap-4">
                                     <input {...register("email")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Email" type="email" />
                                     <input {...register("password")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Password" type="password" />
                                 </div>
