@@ -14,13 +14,18 @@ export const Dashboard = () => {
     const [dataSet, setDataSet] = useState([]);
     let [data, setData] = useState()
     const usersRef = collection(db, "User")
+    
+    const [presentData, setPresentData] = useState()
+    const presentDataRef = collection(db, "getid")
 
     const getData = async () => {
         const userData = await getDocs(usersRef)
         setData(userData.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+        const presentData = await getDocs(presentDataRef)
+        setPresentData(presentData.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
     };
 
-    let uniqueId = Math.floor(Math.random() * (999999999999 - 100000000000 + 1)) + 100000000000;
+    let uniqueId = Math.floor(Math.random() * (99999999 - 10000000 + 1)) + 10000000;
 
     const webRef = useRef(null);
 
@@ -59,6 +64,15 @@ export const Dashboard = () => {
         setShowPopup(false)
     };
 
+    const [isDisplay, setIsDisplay] = useState("member")
+
+    const setSection = (name) => {
+        if(name == "present"){
+            
+        }
+        setIsDisplay(name)
+    }
+
     useEffect(() => {
         getData()
     }, [])
@@ -76,10 +90,10 @@ export const Dashboard = () => {
             const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password)
             const user = userCredential.user
             data.timestamp = serverTimestamp()
-            data.image = ""
+            data.image = "https://firebasestorage.googleapis.com/v0/b/markit-ams-app.appspot.com/o/images%2Fprofile.jpg?alt=media&token=3e954106-214e-42a3-8520-69f44767134c"
             await setDoc(doc(db, 'User', user.uid), data)
             data.images = dataSet
-            const response = await fetch('http://192.168.1.2:5000/process-images', {
+            const response = await fetch('http://192.168.1.10:5000/process-images', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
@@ -118,100 +132,228 @@ export const Dashboard = () => {
                         Glad to see you!
                     </h1>
                 </div>
-                <div className="py-4 grid md:grid-cols-3 grid-cols-1 gap-4">
-                    <div className="col-span-1 font-PoppinsMedium text-2xl text-primary-0 p-4 rounded-md bg-white flex justify-between items-center shadow">
+                <div className="py-4 grid md:grid-cols-4 grid-cols-1 gap-4">
+                    <button onClick={() => setSection("member")} type="button" className="col-span-1 font-PoppinsMedium text-2xl text-primary-0 p-4 rounded-md bg-white flex justify-between items-center shadow">
                         <h1 className="">
-                            Total Member
+                            Member
+                        </h1>
+                        <h1 className="">
+                            {data == undefined ? 0 : data.length }
+                        </h1>
+                    </button>
+                    <button onClick={() => setSection("present")} type="button" className="col-span-1 font-PoppinsMedium text-2xl text-primary-1 p-4 rounded-md bg-white flex justify-between items-center shadow">
+                        <h1 className="">
+                            Present
                         </h1>
                         <h1 className="">
                             0
                         </h1>
-                    </div>
-                    <div className="col-span-1 font-PoppinsMedium text-2xl text-primary-1 p-4 rounded-md bg-white flex justify-between items-center shadow">
+                    </button>
+                    <button onClick={() => setSection("absent")} type="button" className="col-span-1 font-PoppinsMedium text-2xl text-primary-2 p-4 rounded-md bg-white flex justify-between items-center shadow">
                         <h1 className="">
-                            Total Present
+                            Absent
                         </h1>
                         <h1 className="">
                             0
                         </h1>
-                    </div>
-                    <div className="col-span-1 font-PoppinsMedium text-2xl text-primary-2 p-4 rounded-md bg-white flex justify-between items-center shadow">
+                    </button>
+                    <button onClick={() => setSection("application")} type="button" className="col-span-1 font-PoppinsMedium text-2xl text-zinc-700 p-4 rounded-md bg-white flex justify-between items-center shadow">
                         <h1 className="">
-                            Total Absent
+                            Application
                         </h1>
                         <h1 className="">
                             0
                         </h1>
-                    </div>
+                    </button>
                 </div>
                 {
-                    isEdit ?
-                        <div className="w-full bg-white rounded-md shadow">
-                            <div className="p-4 border-b border-zinc-200 flex justify-between items-center">
-                                <h1 className="font-PoppinsSemiBold text-base">
-                                    Registed Members
-                                </h1>
-                                <button onClick={() => setIsEdit(false)} className="font-PoppinsRegular text-base bg-primary-2 text-white py-1 px-4 rounded" type="button">
-                                    Add
-                                </button>
-                            </div>
-                            <div className="h-60 overflow-auto w-full cst-scrollbar">
-                                <div className="flex gap-2 py-3 px-4 border-b">
-                                    <h1 className="font-PoppinsSemiBold w-full">
-                                        Full Name
-                                    </h1>
-                                    <h1 className="font-PoppinsSemiBold w-full">
-                                        User ID
-                                    </h1>
-                                    <h1 className="font-PoppinsSemiBold w-full">
-                                        Email
-                                    </h1>
-                                </div>
-                                {
-                                    data == undefined ? null : data.map((e, i) => (
-                                        <div key={i} className="flex gap-2 py-3 px-4 border-b">
-                                            <h1 className="font-PoppinsRegular w-full">
-                                                {e.firstname} {e.lastname}
+                    isDisplay == "member" ?
+                        <>
+                            {
+                                isEdit ?
+                                    <div className="w-full bg-white rounded-md shadow">
+                                        <div className="p-4 border-b border-zinc-200 flex justify-between items-center">
+                                            <h1 className="font-PoppinsSemiBold text-base">
+                                                Registed Members
                                             </h1>
-                                            <h1 className="font-PoppinsRegular w-full">
-                                                {e.userid}
+                                            <button onClick={() => setIsEdit(false)} className="font-PoppinsRegular text-base bg-primary-2 text-white py-1 px-4 rounded" type="button">
+                                                Add
+                                            </button>
+                                        </div>
+                                        <div className="h-60 overflow-auto w-full cst-scrollbar">
+                                            <div className="flex gap-2 py-3 px-4 border-b">
+                                                <h1 className="font-PoppinsSemiBold w-full">
+                                                    Full Name
+                                                </h1>
+                                                <h1 className="font-PoppinsSemiBold w-full">
+                                                    User ID
+                                                </h1>
+                                                <h1 className="font-PoppinsSemiBold w-full">
+                                                    Email
+                                                </h1>
+                                            </div>
+                                            {
+                                                data == undefined ? null : data.map((e, i) => (
+                                                    <div key={i} className="flex gap-2 py-3 px-4 border-b">
+                                                        <h1 className="font-PoppinsRegular w-full">
+                                                            {e.firstname} {e.lastname}
+                                                        </h1>
+                                                        <h1 className="font-PoppinsRegular w-full">
+                                                            {e.userid}
+                                                        </h1>
+                                                        <h1 className="font-PoppinsRegular w-full">
+                                                            {e.email}
+                                                        </h1>
+                                                    </div>
+                                                ))
+                                            }
+                                        </div>
+                                    </div>
+                                    :
+                                    <div className="w-full bg-white rounded-md shadow">
+                                        <div className="p-4 border-b border-zinc-200 flex justify-between items-center">
+                                            <h1 className="font-PoppinsRegular text-base">
+                                                Registed Members
                                             </h1>
-                                            <h1 className="font-PoppinsRegular w-full">
-                                                {e.email}
+                                            <button onClick={() => setIsEdit(true)} className="font-PoppinsRegular text-base bg-primary-2 text-white py-1 px-4 rounded" type="button">
+                                                Back
+                                            </button>
+                                        </div>
+                                        <form className="h-60 overflow-auto w-full cst-scrollbar flex flex-col justify-between p-4">
+                                            <div className="flex md:flex-nowrap flex-wrap gap-4">
+                                                <input {...register("firstname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="First Name" type="text" />
+                                                <input {...register("lastname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Last Name" type="text" />
+                                            </div>
+                                            <div className="flex md:flex-nowrap flex-wrap gap-4">
+                                                <input {...register("email")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Email" type="email" />
+                                                <input {...register("password")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Password" type="password" />
+                                            </div>
+                                            <button onClick={() => setShowPopup(true)} type='button' className="bg-zinc-100 rounded p-2 px-4 flex justify-center">
+                                                <img className="w-5" src={"/images/Camera.svg"} />
+                                            </button>
+                                            <div className="">
+                                                <button onClick={handleSubmit(onSubmit)} className="font-PoppinsMedium bg-primary-2 text-white w-full rounded p-2 text-center" type="button">Register</button>
+                                            </div>
+
+                                        </form>
+                                    </div>
+                            }
+                        </>
+                        : isDisplay == "present" ?
+                            <>
+                                <div className="w-full bg-white rounded-md shadow">
+                                    <div className="px-4 py-5 border-b border-zinc-200 flex justify-between items-center">
+                                        <h1 className="font-PoppinsSemiBold text-base">
+                                            Present Members
+                                        </h1>
+                                    </div>
+                                    <div className="h-60 overflow-auto w-full cst-scrollbar">
+                                        <div className="flex gap-2 py-3 px-4 border-b">
+                                            <h1 className="font-PoppinsSemiBold w-full">
+                                                Full Name
+                                            </h1>
+                                            <h1 className="font-PoppinsSemiBold w-full">
+                                                User ID
+                                            </h1>
+                                            <h1 className="font-PoppinsSemiBold w-full">
+                                                Email
                                             </h1>
                                         </div>
-                                    ))
-                                }
-                            </div>
-                        </div>
-                        :
-                        <div className="w-full bg-white rounded-md shadow">
-                            <div className="p-4 border-b border-zinc-200 flex justify-between items-center">
-                                <h1 className="font-PoppinsRegular text-base">
-                                    Registed Members
-                                </h1>
-                                <button onClick={() => setIsEdit(true)} className="font-PoppinsRegular text-base bg-primary-2 text-white py-1 px-4 rounded" type="button">
-                                    Back
-                                </button>
-                            </div>
-                            <form className="h-60 overflow-auto w-full cst-scrollbar flex flex-col justify-between p-4">
-                                <div className="flex md:flex-nowrap flex-wrap gap-4">
-                                    <input {...register("firstname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="First Name" type="text" />
-                                    <input {...register("lastname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Last Name" type="text" />
+                                        {/* {
+                                            data == undefined ? null : data.map((e, i) => (
+                                                <div key={i} className="flex gap-2 py-3 px-4 border-b">
+                                                    <h1 className="font-PoppinsRegular w-full">
+                                                        {e.firstname} {e.lastname}
+                                                    </h1>
+                                                    <h1 className="font-PoppinsRegular w-full">
+                                                        {e.userid}
+                                                    </h1>
+                                                    <h1 className="font-PoppinsRegular w-full">
+                                                        {e.email}
+                                                    </h1>
+                                                </div>
+                                            ))
+                                        } */}
+                                    </div>
                                 </div>
-                                <div className="flex md:flex-nowrap flex-wrap gap-4">
-                                    <input {...register("email")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Email" type="email" />
-                                    <input {...register("password")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Password" type="password" />
-                                </div>
-                                <button onClick={() => setShowPopup(true)} type='button' className="bg-zinc-100 rounded p-2 px-4 flex justify-center">
-                                    <img className="w-5" src={"/images/Camera.svg"} />
-                                </button>
-                                <div className="">
-                                    <button onClick={handleSubmit(onSubmit)} className="font-PoppinsMedium bg-primary-2 text-white w-full rounded p-2 text-center" type="button">Register</button>
-                                </div>
-
-                            </form>
-                        </div>
+                            </>
+                            : isDisplay == "absent" ?
+                                <>
+                                    <div className="w-full bg-white rounded-md shadow">
+                                        <div className="px-4 py-5 border-b border-zinc-200 flex justify-between items-center">
+                                            <h1 className="font-PoppinsSemiBold text-base">
+                                                Absent Members
+                                            </h1>
+                                        </div>
+                                        <div className="h-60 overflow-auto w-full cst-scrollbar">
+                                            <div className="flex gap-2 py-3 px-4 border-b">
+                                                <h1 className="font-PoppinsSemiBold w-full">
+                                                    Full Name
+                                                </h1>
+                                                <h1 className="font-PoppinsSemiBold w-full">
+                                                    User ID
+                                                </h1>
+                                                <h1 className="font-PoppinsSemiBold w-full">
+                                                    Email
+                                                </h1>
+                                            </div>
+                                            {/* {
+                                            data == undefined ? null : data.map((e, i) => (
+                                                <div key={i} className="flex gap-2 py-3 px-4 border-b">
+                                                    <h1 className="font-PoppinsRegular w-full">
+                                                        {e.firstname} {e.lastname}
+                                                    </h1>
+                                                    <h1 className="font-PoppinsRegular w-full">
+                                                        {e.userid}
+                                                    </h1>
+                                                    <h1 className="font-PoppinsRegular w-full">
+                                                        {e.email}
+                                                    </h1>
+                                                </div>
+                                            ))
+                                        } */}
+                                        </div>
+                                    </div>
+                                </>
+                                : isDisplay == "application" ?
+                                    <>
+                                        <div className="w-full bg-white rounded-md shadow">
+                                            <div className="px-4 py-5 border-b border-zinc-200 flex justify-between items-center">
+                                                <h1 className="font-PoppinsSemiBold text-base">
+                                                    Applications
+                                                </h1>
+                                            </div>
+                                            <div className="h-60 overflow-auto w-full cst-scrollbar">
+                                                <div className="flex gap-2 py-3 px-4 border-b">
+                                                    <h1 className="font-PoppinsSemiBold w-full">
+                                                        Full Name
+                                                    </h1>
+                                                    <h1 className="font-PoppinsSemiBold w-full">
+                                                        User ID
+                                                    </h1>
+                                                    <h1 className="font-PoppinsSemiBold w-full">
+                                                        Email
+                                                    </h1>
+                                                </div>
+                                                {/* {
+                                            data == undefined ? null : data.map((e, i) => (
+                                                <div key={i} className="flex gap-2 py-3 px-4 border-b">
+                                                    <h1 className="font-PoppinsRegular w-full">
+                                                        {e.firstname} {e.lastname}
+                                                    </h1>
+                                                    <h1 className="font-PoppinsRegular w-full">
+                                                        {e.userid}
+                                                    </h1>
+                                                    <h1 className="font-PoppinsRegular w-full">
+                                                        {e.email}
+                                                    </h1>
+                                                </div>
+                                            ))
+                                        } */}
+                                            </div>
+                                        </div>
+                                    </>
+                                    : null
                 }
             </div>
         </>

@@ -18,8 +18,23 @@ export const Login = () => {
 
     const onSignIn = async (data) => {
         try {
-            await signIn(data.email, data.password)
-            router.push("/admin")
+            if (data.email == "admin@gmail.com" && data.password == "123admin") {
+                await signIn(data.email, data.password)
+                router.push("/admin")
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Wrong Credentials",
+                    toast: true,
+                    animation: true,
+                    position: "top",
+                    timer: 2000,
+                    iconColor: '#27272a',
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                });
+            }
+
         } catch (error) {
             Swal.fire({
                 icon: "error",
@@ -76,7 +91,7 @@ export const Login = () => {
                             :
                             <div className="lg:w-3/4 w-full trshow">
                                 <button onClick={() => setForgetPassword(true)} type="button" className="flex items-center gap-2 text-base text-primary-0 py-2">
-                                    <ArrowLeftCircleIcon className="w-5 h-5"/>
+                                    <ArrowLeftCircleIcon className="w-5 h-5" />
                                     <p className="">Back to Login</p>
                                 </button>
                                 <h1 className="font-PoppinsSemiBold text-4xl text-zinc-800 pb-2 lg:text-left text-center">
