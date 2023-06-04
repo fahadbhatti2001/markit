@@ -228,3 +228,29 @@ input[type="file"] {
         left: 0%;
     }
 }
+
+.cst-fade{
+    opacity: 0;
+    display: flex;
+    overflow: hidden;
+    z-index: -1;
+    animation: cst-fade-tr 3s ease;
+}
+
+@keyframes cst-fade-tr {
+    0%{
+        display: flex;
+        opacity: 1;
+        z-index: 1;
+    }
+    80%{
+        display: flex;
+        opacity: 1;
+        z-index: 1;
+    }
+    100%{
+        display: none;
+        opacity: 0;
+        z-index: -1;
+    }
+}

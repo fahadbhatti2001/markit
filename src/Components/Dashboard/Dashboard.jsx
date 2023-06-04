@@ -5,6 +5,7 @@ import Webcam from 'react-webcam';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, doc, getDocs, serverTimestamp, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/FirebaseConfig';
+import moment from 'moment/moment';
 
 export const Dashboard = () => {
 
@@ -14,15 +15,13 @@ export const Dashboard = () => {
     const [dataSet, setDataSet] = useState([]);
     let [data, setData] = useState()
     const usersRef = collection(db, "User")
-    
-    const [presentData, setPresentData] = useState()
-    const presentDataRef = collection(db, "getid")
+
+    console.log(dataSet.length)
 
     const getData = async () => {
         const userData = await getDocs(usersRef)
-        setData(userData.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
-        const presentData = await getDocs(presentDataRef)
-        setPresentData(presentData.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+        const data = userData.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+        setData(data)
     };
 
     let uniqueId = Math.floor(Math.random() * (99999999 - 10000000 + 1)) + 10000000;
@@ -31,7 +30,7 @@ export const Dashboard = () => {
 
     const makeDataset = () => {
         const newDataSet = [];
-        for (let index = 0; index < 50; index++) {
+        for (let index = 0; index < 100; index++) {
             let capture = webRef.current.getScreenshot();
             const img = new Image();
             img.onload = () => {
@@ -56,20 +55,17 @@ export const Dashboard = () => {
 
                 const dataUrl = canvas.toDataURL();
                 const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, '');
-                newDataSet.push(base64Data);
-                setDataSet(newDataSet);
+                setDataSet(oldArray => [...oldArray, base64Data]);
             };
             img.src = capture;
         }
+
         setShowPopup(false)
     };
 
     const [isDisplay, setIsDisplay] = useState("member")
 
     const setSection = (name) => {
-        if(name == "present"){
-            
-        }
         setIsDisplay(name)
     }
 
@@ -90,10 +86,15 @@ export const Dashboard = () => {
             const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password)
             const user = userCredential.user
             data.timestamp = serverTimestamp()
+            data.attendance = {
+                date: serverTimestamp(),
+                marked: serverTimestamp(),
+                status: false
+            }
             data.image = "https://firebasestorage.googleapis.com/v0/b/markit-ams-app.appspot.com/o/images%2Fprofile.jpg?alt=media&token=3e954106-214e-42a3-8520-69f44767134c"
             await setDoc(doc(db, 'User', user.uid), data)
             data.images = dataSet
-            const response = await fetch('http://192.168.1.10:5000/process-images', {
+            const response = await fetch('http://192.168.1.11:5000/process-images', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
@@ -107,6 +108,40 @@ export const Dashboard = () => {
         }
     }
 
+    const currentDate = moment().format("YYYY-MM-DD");
+    const [date, setDate] = useState(currentDate)
+
+    const dateTime = moment(date).startOf('day');
+    const timestamp = dateTime.unix();
+
+    const getStatus = (attendance) => {
+        let status = null;
+
+        attendance.forEach((e) => {
+            if (e.date.seconds === timestamp) {
+                status = e.status;
+            }
+        });
+        return status;
+    };
+
+    const setAttendanceData = (event) => {
+        setDate(event.target.value)
+    }
+
+    const getAttendance = (attendance) => {
+        let num = 0;
+
+        attendance.forEach((e) => {
+            e.attendance.forEach((i) => {
+                if (i.date.seconds === timestamp && i.status == true) {
+                    num = num + 1
+                }
+            });
+        })
+        return (100 * num) / data.length;
+    }
+
     return (
         <>
             <Spinner isSpinner={spin} />
@@ -117,10 +152,79 @@ export const Dashboard = () => {
                 close={() => setShowPopup(false)}
             >
                 <div>
-                    <Webcam className='scale-x-[-1]' ref={webRef} />
-                    <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
-                        Capture
-                    </button>
+                    {
+                        dataSet.length == 0 ?
+                            <div className="relative">
+                                <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
+                                    <img src="/images/front.svg" alt="" />
+                                    <p className="text-xl">
+                                        Please see straight
+                                    </p>
+                                </div>
+                                <Webcam className='scale-x-[-1]' ref={webRef} />
+                                <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
+                                    Capture
+                                </button>
+                            </div>
+                            :
+                            dataSet.length == 100 ?
+                            <div className="relative">
+                                <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
+                                    <img src="/images/up.svg" alt="" />
+                                    <p className="text-xl">
+                                        Please see up
+                                    </p>
+                                </div>
+                                <Webcam className='scale-x-[-1]' ref={webRef} />
+                                <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
+                                    Capture
+                                </button>
+                            </div>
+                            :
+                            dataSet.length == 200 ?
+                            <div className="relative">
+                                <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
+                                    <img src="/images/down.svg" alt="" />
+                                    <p className="text-xl">
+                                        Please see down
+                                    </p>
+                                </div>
+                                <Webcam className='scale-x-[-1]' ref={webRef} />
+                                <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
+                                    Capture
+                                </button>
+                            </div>
+                            :
+                            dataSet.length == 300 ?
+                            <div className="relative">
+                                <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
+                                    <img src="/images/right.svg" alt="" />
+                                    <p className="text-xl">
+                                        Please see right
+                                    </p>
+                                </div>
+                                <Webcam className='scale-x-[-1]' ref={webRef} />
+                                <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
+                                    Capture
+                                </button>
+                            </div>
+                            :
+                            dataSet.length == 400 ?
+                            <div className="relative">
+                                <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
+                                    <img src="/images/left.svg" alt="" />
+                                    <p className="text-xl">
+                                        Please see left
+                                    </p>
+                                </div>
+                                <Webcam className='scale-x-[-1]' ref={webRef} />
+                                <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
+                                    Capture
+                                </button>
+                            </div>
+                            :
+                            <div className=""></div>
+                    }
                 </div>
             </Modal>
             <div className="h-screen md:px-20 px-4 pt-[10vh]">
@@ -132,32 +236,27 @@ export const Dashboard = () => {
                         Glad to see you!
                     </h1>
                 </div>
-                <div className="py-4 grid md:grid-cols-4 grid-cols-1 gap-4">
+                <div className="py-4 grid md:grid-cols-3 grid-cols-1 gap-4">
                     <button onClick={() => setSection("member")} type="button" className="col-span-1 font-PoppinsMedium text-2xl text-primary-0 p-4 rounded-md bg-white flex justify-between items-center shadow">
                         <h1 className="">
                             Member
                         </h1>
                         <h1 className="">
-                            {data == undefined ? 0 : data.length }
+                            {data == undefined ? 0 : data.length}
                         </h1>
                     </button>
-                    <button onClick={() => setSection("present")} type="button" className="col-span-1 font-PoppinsMedium text-2xl text-primary-1 p-4 rounded-md bg-white flex justify-between items-center shadow">
+                    <button onClick={() => setSection("attendance")} type="button" className="col-span-1 font-PoppinsMedium text-2xl text-primary-1 p-4 rounded-md bg-white flex justify-between items-center shadow">
                         <h1 className="">
-                            Present
+                            Attendance
                         </h1>
                         <h1 className="">
-                            0
-                        </h1>
-                    </button>
-                    <button onClick={() => setSection("absent")} type="button" className="col-span-1 font-PoppinsMedium text-2xl text-primary-2 p-4 rounded-md bg-white flex justify-between items-center shadow">
-                        <h1 className="">
-                            Absent
-                        </h1>
-                        <h1 className="">
-                            0
+                            {
+                                data == undefined ? 0 : getAttendance(data)
+                            }
+                            %
                         </h1>
                     </button>
-                    <button onClick={() => setSection("application")} type="button" className="col-span-1 font-PoppinsMedium text-2xl text-zinc-700 p-4 rounded-md bg-white flex justify-between items-center shadow">
+                    <button onClick={() => setSection("application")} type="button" className="col-span-1 font-PoppinsMedium text-2xl text-primary-2 p-4 rounded-md bg-white flex justify-between items-center shadow">
                         <h1 className="">
                             Application
                         </h1>
@@ -180,7 +279,7 @@ export const Dashboard = () => {
                                                 Add
                                             </button>
                                         </div>
-                                        <div className="h-60 overflow-auto w-full cst-scrollbar">
+                                        <div className="h-64 overflow-auto w-full cst-scrollbar">
                                             <div className="flex gap-2 py-3 px-4 border-b">
                                                 <h1 className="font-PoppinsSemiBold w-full">
                                                     Full Name
@@ -219,35 +318,36 @@ export const Dashboard = () => {
                                                 Back
                                             </button>
                                         </div>
-                                        <form className="h-60 overflow-auto w-full cst-scrollbar flex flex-col justify-between p-4">
-                                            <div className="flex md:flex-nowrap flex-wrap gap-4">
-                                                <input {...register("firstname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="First Name" type="text" />
-                                                <input {...register("lastname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Last Name" type="text" />
-                                            </div>
-                                            <div className="flex md:flex-nowrap flex-wrap gap-4">
-                                                <input {...register("email")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Email" type="email" />
-                                                <input {...register("password")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Password" type="password" />
-                                            </div>
-                                            <button onClick={() => setShowPopup(true)} type='button' className="bg-zinc-100 rounded p-2 px-4 flex justify-center">
-                                                <img className="w-5" src={"/images/Camera.svg"} />
-                                            </button>
-                                            <div className="">
-                                                <button onClick={handleSubmit(onSubmit)} className="font-PoppinsMedium bg-primary-2 text-white w-full rounded p-2 text-center" type="button">Register</button>
-                                            </div>
+                                        <form className="h-64 overflow-auto w-full cst-scrollbar flex flex-col justify-between p-4">
+                                            <input {...register("firstname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="First Name" type="text" />
+                                            <input {...register("lastname")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Last Name" type="text" />
+                                            <input {...register("email")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Email" type="email" />
+                                            <input {...register("password")} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Password" type="password" />
+                                            {
+                                                dataSet.length == 500 ?
+                                                    <div className="">
+                                                        <button onClick={handleSubmit(onSubmit)} className="font-PoppinsMedium bg-primary-2 text-white w-full rounded p-2 text-center" type="button">Register</button>
+                                                    </div>
+                                                    :
+                                                    <button onClick={() => setShowPopup(true)} type='button' className="bg-zinc-100 rounded p-2 px-4 flex justify-center">
+                                                        <img className="w-5" src={"/images/Camera.svg"} />
+                                                    </button>
+                                            }
 
                                         </form>
                                     </div>
                             }
                         </>
-                        : isDisplay == "present" ?
+                        : isDisplay == "attendance" ?
                             <>
                                 <div className="w-full bg-white rounded-md shadow">
                                     <div className="px-4 py-5 border-b border-zinc-200 flex justify-between items-center">
                                         <h1 className="font-PoppinsSemiBold text-base">
-                                            Present Members
+                                            Attendance
                                         </h1>
+                                        <input onChange={(e) => setAttendanceData(e)} className="outline-none" type="date" value={date} />
                                     </div>
-                                    <div className="h-60 overflow-auto w-full cst-scrollbar">
+                                    <div className="h-64 overflow-auto w-full cst-scrollbar">
                                         <div className="flex gap-2 py-3 px-4 border-b">
                                             <h1 className="font-PoppinsSemiBold w-full">
                                                 Full Name
@@ -258,10 +358,13 @@ export const Dashboard = () => {
                                             <h1 className="font-PoppinsSemiBold w-full">
                                                 Email
                                             </h1>
+                                            <h1 className="font-PoppinsSemiBold w-full">
+                                                Status
+                                            </h1>
                                         </div>
-                                        {/* {
+                                        {
                                             data == undefined ? null : data.map((e, i) => (
-                                                <div key={i} className="flex gap-2 py-3 px-4 border-b">
+                                                <div key={i} className="flex gap-2 py-3 px-4 border-b hover:bg-primary-2/10">
                                                     <h1 className="font-PoppinsRegular w-full">
                                                         {e.firstname} {e.lastname}
                                                     </h1>
@@ -271,21 +374,24 @@ export const Dashboard = () => {
                                                     <h1 className="font-PoppinsRegular w-full">
                                                         {e.email}
                                                     </h1>
+                                                    <h1 className="font-PoppinsRegular w-full">
+                                                        {getStatus(e.attendance) == true ? "Present" : getStatus(e.attendance) == false ? "Absent" : "Not Available"}
+                                                    </h1>
                                                 </div>
                                             ))
-                                        } */}
+                                        }
                                     </div>
                                 </div>
                             </>
-                            : isDisplay == "absent" ?
+                            : isDisplay == "application" ?
                                 <>
                                     <div className="w-full bg-white rounded-md shadow">
                                         <div className="px-4 py-5 border-b border-zinc-200 flex justify-between items-center">
                                             <h1 className="font-PoppinsSemiBold text-base">
-                                                Absent Members
+                                                Applications
                                             </h1>
                                         </div>
-                                        <div className="h-60 overflow-auto w-full cst-scrollbar">
+                                        <div className="h-64 overflow-auto w-full cst-scrollbar">
                                             <div className="flex gap-2 py-3 px-4 border-b">
                                                 <h1 className="font-PoppinsSemiBold w-full">
                                                     Full Name
@@ -315,45 +421,7 @@ export const Dashboard = () => {
                                         </div>
                                     </div>
                                 </>
-                                : isDisplay == "application" ?
-                                    <>
-                                        <div className="w-full bg-white rounded-md shadow">
-                                            <div className="px-4 py-5 border-b border-zinc-200 flex justify-between items-center">
-                                                <h1 className="font-PoppinsSemiBold text-base">
-                                                    Applications
-                                                </h1>
-                                            </div>
-                                            <div className="h-60 overflow-auto w-full cst-scrollbar">
-                                                <div className="flex gap-2 py-3 px-4 border-b">
-                                                    <h1 className="font-PoppinsSemiBold w-full">
-                                                        Full Name
-                                                    </h1>
-                                                    <h1 className="font-PoppinsSemiBold w-full">
-                                                        User ID
-                                                    </h1>
-                                                    <h1 className="font-PoppinsSemiBold w-full">
-                                                        Email
-                                                    </h1>
-                                                </div>
-                                                {/* {
-                                            data == undefined ? null : data.map((e, i) => (
-                                                <div key={i} className="flex gap-2 py-3 px-4 border-b">
-                                                    <h1 className="font-PoppinsRegular w-full">
-                                                        {e.firstname} {e.lastname}
-                                                    </h1>
-                                                    <h1 className="font-PoppinsRegular w-full">
-                                                        {e.userid}
-                                                    </h1>
-                                                    <h1 className="font-PoppinsRegular w-full">
-                                                        {e.email}
-                                                    </h1>
-                                                </div>
-                                            ))
-                                        } */}
-                                            </div>
-                                        </div>
-                                    </>
-                                    : null
+                                : null
                 }
             </div>
         </>
