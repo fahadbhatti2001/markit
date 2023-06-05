@@ -250,9 +250,9 @@ export const Dashboard = () => {
                             Attendance
                         </h1>
                         <h1 className="">
-                            {
+                            {/* {
                                 data == undefined ? 0 : getAttendance(data)
-                            }
+                            } */} 0
                             %
                         </h1>
                     </button>
