@@ -1,7 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 
 export const Maps = () => {
+    const [loc, setLoc] = useState({
+        lat: 31.51716120712125,
+        long: 74.2556749360686
+    })
     const mapRef = useRef(null);
     let marker;
     let circle;
@@ -40,7 +44,7 @@ export const Maps = () => {
                         console.error('Error getting current location:', error);
                         // Fallback to a default location if geolocation fails
                         const mapOptions = {
-                            center: { lat: 31.51716120712125, lng: 74.2556749360686 },
+                            center: { lat: loc.lat, lng: loc.long },
                             zoom: 18,
                         };
                         map = new window.google.maps.Map(mapRef.current, mapOptions);
@@ -50,7 +54,7 @@ export const Maps = () => {
                 console.error('Geolocation is not supported by this browser.');
                 // Fallback to a default location if geolocation is not supported
                 const mapOptions = {
-                    center: { lat: 31.51716120712125, lng: 74.2556749360686 },
+                    center: { lat: loc.lat, lng: loc.long },
                     zoom: 18,
                 };
                 map = new window.google.maps.Map(mapRef.current, mapOptions);
@@ -109,6 +113,10 @@ export const Maps = () => {
             // You can access the latitude and longitude of the marker location
             const latitude = location.lat();
             const longitude = location.lng();
+            setLoc({
+                lat: latitude,
+                long: longitude
+            })
             console.log('Marker Latitude:', latitude);
             console.log('Marker Longitude:', longitude);
 
@@ -151,8 +159,20 @@ export const Maps = () => {
                     Glad to see you!
                 </h1>
             </div>
-            <div className="w-1/2">
-                <div className="rounded-xl shadow" ref={mapRef} style={{ width: '100%', height: '400px' }}></div>
+            <div className="grid grid-cols-2 gap-4 w-full">
+                <div className="col-span-1">
+                    <div className="rounded-xl shadow" ref={mapRef} style={{ width: '100%', height: '400px' }}></div>
+                </div>
+                <div className="col-span-1 flex flex-col gap-4">
+                    <h1 className="font-PoppinsSemiBold text-4xl">
+                        Set Location
+                    </h1>
+                    <input value={loc.lat} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Longitude" type="text" />
+                    <input value={loc.long} className="font-PoppinsRegular outline-none bg-zinc-100 w-full rounded p-2" placeholder="Latitude" type="text" />
+                    <div className="">
+                        <button className="font-PoppinsMedium bg-primary-2 text-white w-full rounded p-2 text-center" type="button">Save</button>
+                    </div>
+                </div>
             </div>
         </div>
     );
