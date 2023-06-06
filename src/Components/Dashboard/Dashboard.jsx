@@ -16,8 +16,6 @@ export const Dashboard = () => {
     let [data, setData] = useState()
     const usersRef = collection(db, "User")
 
-    console.log(dataSet.length)
-
     const getData = async () => {
         const userData = await getDocs(usersRef)
         const data = userData.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
@@ -86,11 +84,7 @@ export const Dashboard = () => {
             const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password)
             const user = userCredential.user
             data.timestamp = serverTimestamp()
-            data.attendance = {
-                date: serverTimestamp(),
-                marked: serverTimestamp(),
-                status: false
-            }
+            data.attendance = []
             data.image = "https://firebasestorage.googleapis.com/v0/b/markit-ams-app.appspot.com/o/images%2Fprofile.jpg?alt=media&token=3e954106-214e-42a3-8520-69f44767134c"
             await setDoc(doc(db, 'User', user.uid), data)
             data.images = dataSet
@@ -132,14 +126,14 @@ export const Dashboard = () => {
     const getAttendance = (attendance) => {
         let num = 0;
 
-        attendance.forEach((e) => {
-            e.attendance.forEach((i) => {
-                if (i.date.seconds === timestamp && i.status == true) {
-                    num = num + 1
-                }
-            });
-        })
-        return (100 * num) / data.length;
+        // attendance.forEach((e) => {
+        //     e.attendance.forEach((i) => {
+        //         if (i.date.seconds === timestamp && i.status == true) {
+        //             num = num + 1
+        //         }
+        //     });
+        // })
+        // return (100 * num) / data.length;
     }
 
     return (
@@ -168,62 +162,62 @@ export const Dashboard = () => {
                             </div>
                             :
                             dataSet.length == 100 ?
-                            <div className="relative">
-                                <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
-                                    <img src="/images/up.svg" alt="" />
-                                    <p className="text-xl">
-                                        Please see up
-                                    </p>
+                                <div className="relative">
+                                    <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
+                                        <img src="/images/up.svg" alt="" />
+                                        <p className="text-xl">
+                                            Please see up
+                                        </p>
+                                    </div>
+                                    <Webcam className='scale-x-[-1]' ref={webRef} />
+                                    <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
+                                        Capture
+                                    </button>
                                 </div>
-                                <Webcam className='scale-x-[-1]' ref={webRef} />
-                                <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
-                                    Capture
-                                </button>
-                            </div>
-                            :
-                            dataSet.length == 200 ?
-                            <div className="relative">
-                                <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
-                                    <img src="/images/down.svg" alt="" />
-                                    <p className="text-xl">
-                                        Please see down
-                                    </p>
-                                </div>
-                                <Webcam className='scale-x-[-1]' ref={webRef} />
-                                <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
-                                    Capture
-                                </button>
-                            </div>
-                            :
-                            dataSet.length == 300 ?
-                            <div className="relative">
-                                <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
-                                    <img src="/images/right.svg" alt="" />
-                                    <p className="text-xl">
-                                        Please see right
-                                    </p>
-                                </div>
-                                <Webcam className='scale-x-[-1]' ref={webRef} />
-                                <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
-                                    Capture
-                                </button>
-                            </div>
-                            :
-                            dataSet.length == 400 ?
-                            <div className="relative">
-                                <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
-                                    <img src="/images/left.svg" alt="" />
-                                    <p className="text-xl">
-                                        Please see left
-                                    </p>
-                                </div>
-                                <Webcam className='scale-x-[-1]' ref={webRef} />
-                                <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
-                                    Capture
-                                </button>
-                            </div>
-                            :
-                            <div className=""></div>
+                                :
+                                dataSet.length == 200 ?
+                                    <div className="relative">
+                                        <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
+                                            <img src="/images/down.svg" alt="" />
+                                            <p className="text-xl">
+                                                Please see down
+                                            </p>
+                                        </div>
+                                        <Webcam className='scale-x-[-1]' ref={webRef} />
+                                        <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
+                                            Capture
+                                        </button>
+                                    </div>
+                                    :
+                                    dataSet.length == 300 ?
+                                        <div className="relative">
+                                            <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
+                                                <img src="/images/right.svg" alt="" />
+                                                <p className="text-xl">
+                                                    Please see right
+                                                </p>
+                                            </div>
+                                            <Webcam className='scale-x-[-1]' ref={webRef} />
+                                            <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
+                                                Capture
+                                            </button>
+                                        </div>
+                                        :
+                                        dataSet.length == 400 ?
+                                            <div className="relative">
+                                                <div className="absolute z-10 top-0 w-full h-full flex-col justify-center items-center gap-8 bg-white cst-fade">
+                                                    <img src="/images/left.svg" alt="" />
+                                                    <p className="text-xl">
+                                                        Please see left
+                                                    </p>
+                                                </div>
+                                                <Webcam className='scale-x-[-1]' ref={webRef} />
+                                                <button onClick={() => makeDataset()} className="font-PoppinsRegular text-base bg-primary-2 text-white py-2 mt-2 w-full rounded" type="button">
+                                                    Capture
+                                                </button>
+                                            </div>
+                                            :
+                                            <div className=""></div>
                     }
                 </div>
             </Modal>
@@ -250,9 +244,9 @@ export const Dashboard = () => {
                             Attendance
                         </h1>
                         <h1 className="">
-                            {/* {
+                            {
                                 data == undefined ? 0 : getAttendance(data)
-                            } */} 0
+                            }
                             %
                         </h1>
                     </button>

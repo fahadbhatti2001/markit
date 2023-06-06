@@ -4,6 +4,7 @@ export { Login } from "./Public/Login";
 
 // Private Components
 export { Dashboard } from "./Dashboard/Dashboard";
+export { Maps } from "./Dashboard/Maps";
 
 // General Components
 export { Modal } from "./General/Modal";

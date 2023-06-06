@@ -35,7 +35,7 @@ export const ProfileButton = () => {
                                         Admin
                                     </h1>
                                     <p className="font-PoppinsRegular text-primary-4 text-xs">
-                                        {user && user.email}
+                                        admin@gmail.com
                                     </p>
                                 </div>
                             </div>
@@ -43,10 +43,17 @@ export const ProfileButton = () => {
                                 <img src={"/images/LogOut.svg"} className="w-5 h-5" />
                             </button>
                         </div>
-                        <Link onClick={() => setPanel(!false)} href="/admin" className="flex items-center justify-between gap-4 p-4 rounded-b-md hover:text-primary-0 transition ">
+                        <Link onClick={() => setPanel(!false)} href="/admin" className="flex items-center justify-between gap-4 px-4 py-3 border-t border-t-zinc-100 rounded-b-md hover:text-primary-0 transition ">
                             <div className="text-left">
                                 <h1 className="font-PoppinsRegular text-primary-4 text-base">
                                     Dashboard
+                                </h1>
+                            </div>
+                        </Link>
+                        <Link onClick={() => setPanel(!false)} href="/map" className="flex items-center justify-between gap-4 px-4 py-3 border-t border-t-zinc-100 rounded-b-md hover:text-primary-0 transition ">
+                            <div className="text-left">
+                                <h1 className="font-PoppinsRegular text-primary-4 text-base">
+                                    Set Map
                                 </h1>
                             </div>
                         </Link>
