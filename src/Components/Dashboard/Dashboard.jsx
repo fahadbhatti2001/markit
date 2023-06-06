@@ -88,7 +88,7 @@ export const Dashboard = () => {
             data.image = "https://firebasestorage.googleapis.com/v0/b/markit-ams-app.appspot.com/o/images%2Fprofile.jpg?alt=media&token=3e954106-214e-42a3-8520-69f44767134c"
             await setDoc(doc(db, 'User', user.uid), data)
             data.images = dataSet
-            const response = await fetch('http://192.168.1.11:5000/process-images', {
+            const response = await fetch('http://192.168.10.3:5000/process-images', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
