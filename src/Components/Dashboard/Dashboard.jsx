@@ -14,12 +14,15 @@ export const Dashboard = () => {
     let [spin, setSpin] = useState(false)
     const [dataSet, setDataSet] = useState([]);
     let [data, setData] = useState()
+    let [leaveData, setLeaveData] = useState([])
     const usersRef = collection(db, "User")
+    const leaveRef = collection(db, "application")
 
     const getData = async () => {
         const userData = await getDocs(usersRef)
-        const data = userData.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-        setData(data)
+        setData(userData.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+        const leavesData = await getDocs(leaveRef)
+        setLeaveData(leavesData.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
     };
 
     let uniqueId = Math.floor(Math.random() * (99999999 - 10000000 + 1)) + 10000000;
@@ -88,7 +91,7 @@ export const Dashboard = () => {
             data.image = "https://firebasestorage.googleapis.com/v0/b/markit-ams-app.appspot.com/o/images%2Fprofile.jpg?alt=media&token=3e954106-214e-42a3-8520-69f44767134c"
             await setDoc(doc(db, 'User', user.uid), data)
             data.images = dataSet
-            const response = await fetch('http://192.168.10.3:5000/process-images', {
+            const response = await fetch('http://192.168.1.9:5000/process-images', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
@@ -126,14 +129,14 @@ export const Dashboard = () => {
     const getAttendance = (attendance) => {
         let num = 0;
 
-        // attendance.forEach((e) => {
-        //     e.attendance.forEach((i) => {
-        //         if (i.date.seconds === timestamp && i.status == true) {
-        //             num = num + 1
-        //         }
-        //     });
-        // })
-        // return (100 * num) / data.length;
+        attendance.forEach((e) => {
+            e.attendance.forEach((i) => {
+                if (i.date.seconds === timestamp && i.status == true) {
+                    num = num + 1
+                }
+            });
+        })
+        return (100 * num) / data.length;
     }
 
     return (
@@ -255,7 +258,7 @@ export const Dashboard = () => {
                             Application
                         </h1>
                         <h1 className="">
-                            0
+                            {leaveData.length}
                         </h1>
                     </button>
                 </div>
@@ -391,27 +394,33 @@ export const Dashboard = () => {
                                                     Full Name
                                                 </h1>
                                                 <h1 className="font-PoppinsSemiBold w-full">
-                                                    User ID
+                                                    Start Date
                                                 </h1>
                                                 <h1 className="font-PoppinsSemiBold w-full">
-                                                    Email
+                                                    End Date
+                                                </h1>
+                                                <h1 className="font-PoppinsSemiBold w-full">
+                                                    Reason
                                                 </h1>
                                             </div>
-                                            {/* {
-                                            data == undefined ? null : data.map((e, i) => (
-                                                <div key={i} className="flex gap-2 py-3 px-4 border-b">
-                                                    <h1 className="font-PoppinsRegular w-full">
-                                                        {e.firstname} {e.lastname}
-                                                    </h1>
-                                                    <h1 className="font-PoppinsRegular w-full">
-                                                        {e.userid}
-                                                    </h1>
-                                                    <h1 className="font-PoppinsRegular w-full">
-                                                        {e.email}
-                                                    </h1>
-                                                </div>
-                                            ))
-                                        } */}
+                                            {
+                                                leaveData == undefined ? null : leaveData.map((e, i) => (
+                                                    <div key={i} className="flex gap-2 py-3 px-4 border-b">
+                                                        <h1 className="font-PoppinsRegular w-full">
+                                                            {e.name}
+                                                        </h1>
+                                                        <h1 className="font-PoppinsRegular w-full">
+                                                            {e.startdate}
+                                                        </h1>
+                                                        <h1 className="font-PoppinsRegular w-full">
+                                                            {e.enddate}
+                                                        </h1>
+                                                        <h1 className="font-PoppinsRegular w-full">
+                                                            {e.reason}
+                                                        </h1>
+                                                    </div>
+                                                ))
+                                            }
                                         </div>
                                     </div>
                                 </>
